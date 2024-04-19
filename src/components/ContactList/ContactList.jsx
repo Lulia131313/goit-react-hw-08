@@ -1,36 +1,35 @@
 import { useDispatch, useSelector } from "react-redux";
 import s from "./Cont.module.css";
 import Contact from "./Contact/Contact";
-import { selectNameFilter } from "../../redux/filtersSlice";
-import { deleteContact, selectContacts } from "../../redux/contactsSlice";
+import { selectLoading } from "../../redux/filters/selectors";
+import { useEffect } from "react";
+import { deleteContacts, fetchContacts } from "../../redux/contacts/operations";
+import { selectFilteredContacts } from "../../redux/filters/selectors";
 
 const ContactList = () => {
+  const loading = useSelector(selectLoading);
+  const filteredData = useSelector(selectFilteredContacts);
   const dispatch = useDispatch();
-  const contacts = useSelector(selectContacts);
-  const filteredContacts = useSelector(selectNameFilter);
 
-  const handleDelete = (id) => {
-    dispatch(deleteContact(id));
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
+
+  const handleDeleteContacts = (id) => {
+    dispatch(deleteContacts(id));
   };
-
-  const filterContacts = (contact) => {
-    const { name, number } = contact;
-    const searchText = filteredContacts.toLowerCase();
-    return (
-      name.toLowerCase().includes(searchText) ||
-      number.toLowerCase().includes(searchText)
-    );
-  };
-
-  const filteredData = contacts.filter(filterContacts);
 
   return (
-    <ul className={s.contacts}>
+    <ul className="cont">
+      {loading && <p>Loading...</p>}
       {filteredData.map((contact) => (
-        <Contact key={contact.id} item={contact} onDelete={handleDelete} />
+        <Contact
+          key={contact.id}
+          item={contact}
+          handleDeleteContacts={handleDeleteContacts}
+        />
       ))}
     </ul>
   );
 };
-
 export default ContactList;
